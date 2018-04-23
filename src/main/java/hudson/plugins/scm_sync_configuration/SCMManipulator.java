@@ -5,6 +5,7 @@ import hudson.plugins.scm_sync_configuration.scms.SCM;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFile;
 import org.apache.maven.scm.ScmFileSet;
+import org.apache.maven.scm.*;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
@@ -36,7 +37,7 @@ public class SCMManipulator {
     private final ScmManager scmManager;
     private ScmRepository scmRepository = null;
     private String scmSpecificFilename = null;
-
+    private String scmGitBranch;
     public SCMManipulator(ScmManager _scmManager) {
         this.scmManager = _scmManager;
     }
@@ -67,6 +68,7 @@ public class SCMManipulator {
             }
         }
 
+        scmGitBranch = scmContext.getScmGitBranch();
         return expectScmRepositoryInitiated();
     }
 
@@ -91,7 +93,13 @@ public class SCMManipulator {
         // Checkouting sources
         LOGGER.fine("Checking out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
         try {
-            CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
+            // CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
+            ScmBranch scmBranch = null;
+            if (scmGitBranch != null && scmGitBranch.length() > 0){
+                scmBranch = new ScmBranch(scmGitBranch);
+            }
+            CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory),scmBranch);
+
             if(!result.isSuccess()){
                 LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage()+" || "+result.getCommandOutput());
                 return checkoutOk;

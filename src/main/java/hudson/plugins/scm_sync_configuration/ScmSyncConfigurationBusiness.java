@@ -345,6 +345,22 @@ public class ScmSyncConfigurationBusiness {
         return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath()), "");
     }
 
+    public List<File> removeSourceJobsDuringReload() throws IOException {
+        List<File> l = new ArrayList<File>();
+        File jobsFolder = new File(Jenkins.getInstance().getRootDir().toString()+"/jobs");
+        LOGGER.info("Configuration reload - jobs removal. Cleaning up folder:"+jobsFolder);
+
+        for(File f: jobsFolder.listFiles()){
+            l.add(f);
+            if (f.isDirectory()){
+                FileUtils.deleteDirectory(f);
+            } else {
+                FileUtils.forceDelete(f);
+            }
+        }
+        return l;
+    }
+    
     private List<File> syncDirectories(File from, String relative) throws IOException {
         List<File> l = new ArrayList<File>();
         for(File f : from.listFiles()) {

@@ -38,7 +38,6 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 	/**
 	 * Migrators for old versions of GlobalBuildStatsPlugin data representations
 	 */
-	@SuppressWarnings("rawtypes") // Generic arrays not possible
 	private static final ScmSyncConfigurationDataMigrator[] MIGRATORS = new ScmSyncConfigurationDataMigrator[]{
 		new InitialMigrator(),
 		new V0ToV1Migrator()
@@ -47,7 +46,7 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 	/**
 	 * Converter is only applicable on GlobalBuildStatsPlugin data
 	 */
-	public boolean canConvert(@SuppressWarnings("rawtypes") Class type) { // Inherited signature
+	public boolean canConvert(Class type) {
 		return ScmSyncConfigurationPlugin.class.isAssignableFrom(type);
 	}
 
@@ -70,6 +69,11 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 			writer.setValue(plugin.getScmRepositoryUrl());
 			writer.endNode();
 		}
+        if(plugin.getScmGitBranch() != null){
+            writer.startNode(AbstractMigrator.SCM_GIT_BRANCH);
+            writer.setValue(plugin.getScmGitBranch());
+            writer.endNode();
+        }
 
 		writer.startNode(AbstractMigrator.SCM_NO_USER_COMMIT_MESSAGE);
 		writer.setValue(Boolean.toString(plugin.isNoUserCommitMessage()));
@@ -140,24 +144,12 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 		// Migrating old data into up-to-date data
 		// Added "+1" because we take into consideration InitialMigrator
 		for(int i=versionNumber+1; i<getCurrentScmSyncConfigurationVersionNumber()+1; i++){
-			pojo = migrate(MIGRATORS[i], pojo);
+			pojo = MIGRATORS[i].migrate(pojo);
 		}
 		
 		// Populating latest POJO information into ScmSyncConfigurationPlugin
 		plugin.loadData(pojo);
 		
 		return plugin;
-	}
-	
-	/**
-	 * Factor out the actual migration to be able to localize the SuppressWarnings annotation.
-	 * 
-	 * @param migrator to use
-	 * @param pojo to migrate
-	 * @return the migrated pojo
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private ScmSyncConfigurationPOJO migrate(ScmSyncConfigurationDataMigrator migrator, ScmSyncConfigurationPOJO pojo) {
-		return migrator.migrate(pojo);
 	}
 }

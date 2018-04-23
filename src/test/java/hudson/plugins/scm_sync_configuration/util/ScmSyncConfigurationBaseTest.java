@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "org.tmatesoft.svn.*" })
-@PrepareForTest({Hudson.class, Jenkins.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
+@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
 public abstract class ScmSyncConfigurationBaseTest {
 
     @Rule protected TestName testName = new TestName();
